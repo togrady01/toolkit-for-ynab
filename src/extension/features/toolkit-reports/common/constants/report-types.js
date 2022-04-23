@@ -7,6 +7,7 @@ export const ReportKeys = {
   IncomeBreakdown: 'income-breakdown',
   BalanceOverTime: 'balance-over-time',
   Forecast: 'forecast',
+  AgeOfMoney: 'age-of-money',
 };
 
 export const ReportNames = {
@@ -18,6 +19,7 @@ export const ReportNames = {
   IncomeBreakdown: 'Income Breakdown',
   BalanceOverTime: 'Balance Over Time',
   Forecast: 'Forecast',
+  AgeOfMoney: 'Age of Money',
 };
 
 export const REPORT_TYPES = [
@@ -52,5 +54,9 @@ export const REPORT_TYPES = [
   {
     key: ReportKeys.Forecast,
     name: ReportNames.Forecast,
+  },
+  {
+    key: ReportKeys.AgeOfMoney,
+    name: ReportNames.AgeOfMoney,
   },
 ];

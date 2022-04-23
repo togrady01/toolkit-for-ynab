@@ -58,6 +58,7 @@ export class IncomeVsExpenseComponent extends React.Component {
 
   componentDidMount() {
     this._calculateData();
+    console.log(Collections);
   }
 
   componentDidUpdate(prevProps) {
@@ -158,6 +159,7 @@ export class IncomeVsExpenseComponent extends React.Component {
   };
 
   _calculateData() {
+    console.log({ props: this.props, state: this.state });
     if (!this.props.filters) {
       return;
     }

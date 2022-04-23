@@ -16,11 +16,14 @@ import {
 } from 'toolkit-reports/utils/storage';
 import { IncomeBreakdown } from '../../../pages/income-breakdown/container';
 import { Forecast } from '../../../pages/forecast';
+import { AgeOfMoney } from '../../../pages/age-of-money';
+import { getEntityManager } from 'toolkit/extension/utils/ynab';
 
 export const SelectedReportContextPropType = {
   component: PropTypes.func.isRequired,
   key: PropTypes.string.isRequired,
   filterSettings: PropTypes.shape({
+    disable: PropTypes.bool,
     disableCategoryFilter: PropTypes.bool,
     disableTrackingAccounts: PropTypes.bool,
     includeTrackingAccounts: PropTypes.bool,
@@ -103,6 +106,13 @@ const REPORT_COMPONENTS = [
       includeTrackingAccounts: true,
     },
   },
+  {
+    component: AgeOfMoney,
+    key: ReportKeys.AgeOfMoney,
+    filterSettings: {
+      disable: true,
+    },
+  },
 ];
 
 const { Provider, Consumer } = React.createContext({
@@ -112,6 +122,7 @@ const { Provider, Consumer } = React.createContext({
   setActiveReportKey: () => {},
   setFilters: () => {},
   allReportableTransactions: [],
+  budgets: [],
 });
 
 export function withReportContextProvider(InnerComponent) {
@@ -129,6 +140,7 @@ export function withReportContextProvider(InnerComponent) {
         filteredTransactions: [],
         filters: getStoredFilters(activeReportKey),
         allReportableTransactions: [],
+        budgets: [],
       };
     }
 
@@ -144,10 +156,13 @@ export function withReportContextProvider(InnerComponent) {
             !transaction.get('isScheduledSubTransaction')
         );
 
+        const budgets = getEntityManager().getAllMonthlyBudgetCalculations();
+
         this.setState(
           {
             filteredTransactions: [],
             allReportableTransactions,
+            budgets,
           },
           () => {
             this._applyFilters(this.state.activeReportKey);
@@ -167,6 +182,7 @@ export function withReportContextProvider(InnerComponent) {
               setActiveReportKey: this._setActiveReportKey,
               setFilters: this._setFilters,
               allReportableTransactions: this.state.allReportableTransactions,
+              budgets: this.state.budgets,
             }}
           >
             <InnerComponent {...this.props} />

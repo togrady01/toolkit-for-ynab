@@ -18,11 +18,13 @@ export class ReportFiltersComponent extends React.Component {
   };
 
   render() {
-    const { disableCategoryFilter } = this.props.selectedReport.filterSettings;
+    const { disableCategoryFilter, disable } = this.props.selectedReport.filterSettings;
     const { accountFilterIds, categoryFilterIds, dateFilter } = this.props.filters;
     const categoryButtonClasses = classnames('tk-button', 'tk-button--medium', 'tk-button--text', {
       'tk-button--disabled': disableCategoryFilter,
     });
+
+    if (disable) return null;
 
     return (
       <div className="tk-flex tk-pd-05 tk-flex-shrink-none tk-border-b">
