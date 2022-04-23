@@ -29,10 +29,12 @@ export class RootComponent extends React.Component {
     const { component: Report } = this.props.selectedReport;
 
     return (
-      <div className="tk-reports-root tk-flex tk-flex-column tk-full-height">
+      <div className="tk-reports-root tk-flex tk-flex-row tk-full-height">
         <ReportSelector />
-        <ReportFilters />
-        <Report />
+        <div className="tk-flex-column tk-flex tk-full-width tk-full-height">
+          <ReportFilters />
+          <Report />
+        </div>
       </div>
     );
   }

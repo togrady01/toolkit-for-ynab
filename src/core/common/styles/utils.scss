@@ -31,6 +31,9 @@ $grey-8: hsl(190, 18%, 85%);
 .tk-flex-column {
   flex-direction: column;
 }
+.tk-flex-wrap {
+  flex-wrap: wrap;
+}
 
 .tk-flex-grow {
   flex-grow: 1;
