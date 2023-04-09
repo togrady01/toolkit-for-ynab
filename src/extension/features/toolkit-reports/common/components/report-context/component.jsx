@@ -18,6 +18,7 @@ import {
 import { IncomeBreakdown } from '../../../pages/income-breakdown/container';
 import { Forecast } from '../../../pages/forecast';
 import { AgeOfMoney } from '../../../pages/age-of-money';
+import { BudgetTrend } from '../../../pages/budget-trend';
 import { getEntityManager } from 'toolkit/extension/utils/ynab';
 
 export const SelectedReportContextPropType = {
@@ -120,6 +121,15 @@ const REPORT_COMPONENTS = [
     key: ReportKeys.AgeOfMoney,
     filterSettings: {
       disable: true,
+    },
+  },
+  {
+    component: BudgetTrend,
+    key: ReportKeys.BudgetTrend,
+    filterSettings: {
+      disableTrackingAccounts: false,
+      includeTrackingAccounts: true,
+      disableCategoryFilter: true,
     },
   },
 ];

@@ -9,6 +9,7 @@ export const ReportKeys = {
   OutflowOverTime: 'outflow-over-time',
   Forecast: 'forecast',
   AgeOfMoney: 'age-of-money',
+  BudgetTrend: 'budget-trend',
 };
 
 export const ReportNames = {
@@ -22,6 +23,7 @@ export const ReportNames = {
   OutflowOverTime: 'Outflow Over Time',
   Forecast: 'Forecast',
   AgeOfMoney: 'Age of Money',
+  BudgetTrend: 'Budget Trend',
 };
 
 export const REPORT_TYPES = [
@@ -64,5 +66,9 @@ export const REPORT_TYPES = [
   {
     key: ReportKeys.AgeOfMoney,
     name: ReportNames.AgeOfMoney,
+  },
+  {
+    key: ReportKeys.BudgetTrend,
+    name: ReportNames.BudgetTrend,
   },
 ];
