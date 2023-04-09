@@ -1,5 +1,5 @@
 import { Feature } from 'toolkit/extension/features/feature';
-import { isCurrentRouteBudgetPage, isCurrentMonthSelected } from 'toolkit/extension/utils/ynab';
+import { isCurrentMonthSelected } from 'toolkit/extension/utils/ynab';
 import { getEmberView } from 'toolkit/extension/utils/ember';
 import {
   getDeemphasizedCategories,
@@ -15,7 +15,7 @@ export class Pacing extends Feature {
   }
 
   shouldInvoke() {
-    return isCurrentRouteBudgetPage();
+    return true;
   }
 
   destroy() {
@@ -23,86 +23,83 @@ export class Pacing extends Feature {
   }
 
   invoke() {
+    this.addToolkitEmberHook('budget-table-row', 'didRender', this.addPacing);
+  }
+
+  ensureHeader() {
+    if (!$('.budget-table-header .tk-budget-table-cell-pacing').length) {
+      $('.budget-table-header .budget-table-cell-available').after(
+        `<div class="tk-budget-table-cell-pacing">${l10n('toolkit.pacing', 'PACING')}</div>`
+      );
+    }
+  }
+
+  addPacing(element) {
     if (!isCurrentMonthSelected()) {
       $('.tk-budget-table-cell-pacing').remove();
       return;
     }
 
-    if (!$('.budget-table-header .tk-budget-table-cell-pacing').length) {
-      $('.budget-table-header .budget-table-cell-available').after(
-        `<li class="tk-budget-table-cell-pacing">${l10n('toolkit.pacing', 'PACING')}</li>`
-      );
+    this.ensureHeader();
+
+    if (element.classList.contains('is-master-category')) {
+      if (!element.querySelector('.tk-budget-table-cell-pacing')) {
+        $('.budget-table-cell-available', element).after(
+          `<div class="tk-budget-table-cell-pacing"></div>`
+        );
+      }
+
+      return;
     }
 
-    $('.budget-table-row').each((_, element) => {
-      if (element.classList.contains('is-master-category')) {
-        if (!element.querySelector('.tk-budget-table-cell-pacing')) {
-          $('.budget-table-cell-available', element).after(
-            `<li class="tk-budget-table-cell-pacing"></li>`
-          );
-        }
-
-        return;
+    if (element.classList.contains('is-debt-payment-category')) {
+      if (!element.querySelector('.tk-budget-table-cell-pacing')) {
+        $('.budget-table-cell-available', element).after(
+          `<div class="tk-budget-table-cell-pacing"></div>`
+        );
       }
 
-      if (element.classList.contains('is-debt-payment-category')) {
-        if (!element.querySelector('.tk-budget-table-cell-pacing')) {
-          $('.budget-table-cell-available', element).after(
-            `<li class="tk-budget-table-cell-pacing"></li>`
-          );
-        }
+      return;
+    }
 
-        return;
+    const category = getEmberView(element.id).category;
+    if (!category) {
+      return;
+    }
+
+    const pacingCalculation = pacingForCategory(category);
+
+    const $display = this.generateDisplay(category.get('subCategory.entityId'), pacingCalculation);
+
+    $display.on('click', (event) => {
+      const deemphasizedCategories = getDeemphasizedCategories();
+      const subCategoryId = event.target.getAttribute('data-tk-sub-category-id');
+
+      if (deemphasizedCategories.contains(subCategoryId)) {
+        $(event.target).removeClass('deemphasized');
+        setDeemphasizedCategories(
+          deemphasizedCategories.filter((id) => {
+            return id !== subCategoryId;
+          })
+        );
+      } else {
+        $(event.target).addClass('deemphasized');
+        deemphasizedCategories.push(subCategoryId);
+        setDeemphasizedCategories(deemphasizedCategories);
       }
 
-      const category = getEmberView(element.id, 'category');
-      if (!category) {
-        return;
+      if (['pacing', 'both'].indexOf(ynabToolKit.options.BudgetProgressBars) !== -1) {
+        ynabToolKit.invokeFeature('BudgetProgressBars');
       }
 
-      const pacingCalculation = pacingForCategory(category);
-
-      const $display = this.generateDisplay(
-        category.get('subCategory.entityId'),
-        pacingCalculation
-      );
-
-      $display.on('click', (event) => {
-        const deemphasizedCategories = getDeemphasizedCategories();
-        const subCategoryId = event.target.getAttribute('data-tk-sub-category-id');
-
-        if (deemphasizedCategories.contains(subCategoryId)) {
-          $(event.target).removeClass('deemphasized');
-          setDeemphasizedCategories(
-            deemphasizedCategories.filter((id) => {
-              return id !== subCategoryId;
-            })
-          );
-        } else {
-          $(event.target).addClass('deemphasized');
-          deemphasizedCategories.push(subCategoryId);
-          setDeemphasizedCategories(deemphasizedCategories);
-        }
-
-        if (['pacing', 'both'].indexOf(ynabToolKit.options.BudgetProgressBars) !== -1) {
-          ynabToolKit.invokeFeature('BudgetProgressBars');
-        }
-
-        event.stopPropagation();
-      });
-
-      if ($('.tk-budget-table-cell-pacing', element).length) {
-        $('.tk-budget-table-cell-pacing', element).remove();
-      }
-
-      $('.budget-table-cell-available', element).after($display);
+      event.stopPropagation();
     });
-  }
 
-  onRouteChanged() {
-    if (this.shouldInvoke()) {
-      this.invoke();
+    if ($('.tk-budget-table-cell-pacing', element).length) {
+      $('.tk-budget-table-cell-pacing', element).remove();
     }
+
+    $('.budget-table-cell-available', element).after($display);
   }
 
   generateDisplay(subCategoryId, pacingCalculation) {
@@ -114,13 +111,13 @@ export class Pacing extends Feature {
     const tooltip = this.generateTooltip(pacingCalculation);
 
     const $display = $(`
-      <li class="tk-budget-table-cell-pacing">
-        <div
+      <div class="tk-budget-table-cell-pacing">
+        <button
           title="${tooltip}"
           data-tk-sub-category-id="${subCategoryId}"
           class="ynab-new-budget-available-number tk-pacing-number currency ${temperatureClass} ${deemphasizedClass} ${indicatorClass}"
         />
-      </li>
+      </div>
     `);
 
     const daysFormat = Math.abs(daysOffTarget) === 1 ? 'day' : 'days';

@@ -1,16 +1,17 @@
 import { Feature } from 'toolkit/extension/features/feature';
-import { isCurrentRouteBudgetPage } from 'toolkit/extension/utils/ynab';
 
 export class RemoveZeroCategories extends Feature {
-  shouldInvoke() {
-    return isCurrentRouteBudgetPage();
-  }
-
   destroy() {
     $('.modal-budget-overspending .dropdown-list > li').removeClass('tk-hidden');
   }
 
-  invoke() {
+  observe(changedNodes) {
+    if (changedNodes.has('dropdown-container categories-dropdown-container')) {
+      this.hideEmpties();
+    }
+  }
+
+  hideEmpties() {
     let lastSectionItem = null;
     let hideSectionItem = true;
 
@@ -41,16 +42,6 @@ export class RemoveZeroCategories extends Feature {
 
     if (lastSectionItem && hideSectionItem) {
       lastSectionItem.classList.add('tk-hidden');
-    }
-  }
-
-  observe(changedNodes) {
-    if (!this.shouldInvoke()) {
-      return;
-    }
-
-    if (changedNodes.has('category-item-container')) {
-      this.invoke();
     }
   }
 }

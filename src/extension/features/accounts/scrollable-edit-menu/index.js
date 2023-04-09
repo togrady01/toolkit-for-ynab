@@ -1,5 +1,4 @@
 import { Feature } from 'toolkit/extension/features/feature';
-import { isCurrentRouteAccountsPage } from 'toolkit/extension/utils/ynab';
 
 export class ScrollableEditMenu extends Feature {
   injectCSS() {
@@ -7,15 +6,13 @@ export class ScrollableEditMenu extends Feature {
   }
 
   shouldInvoke() {
-    return isCurrentRouteAccountsPage();
+    return true;
   }
 
   invoke() {
-    this.addToolkitEmberHook(
-      'modals/register/edit-transactions',
-      'didRender',
-      this.addScrollWrappers
-    );
+    this.addToolkitEmberHook('modal', 'didRender', this.addScrollWrappers, {
+      guard: () => document.querySelector('.modal-account-edit-transaction-list') !== null,
+    });
   }
 
   destroy() {}

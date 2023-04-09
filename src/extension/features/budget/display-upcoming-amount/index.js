@@ -22,7 +22,7 @@ export class DisplayUpcomingAmount extends Feature {
     $('.tk-activity-upcoming-amount').remove();
 
     $('.budget-table-row.is-sub-category').each((_, element) => {
-      const category = getEmberView(element.id, 'category');
+      const category = getEmberView(element.id).category;
       if (!category) {
         return;
       }
@@ -51,6 +51,15 @@ export class DisplayUpcomingAmount extends Feature {
         }
       }
     });
+  }
+
+  observe(changedNodes) {
+    if (!this.shouldInvoke()) return;
+
+    // This changes when overspending filter gets toggled
+    if (changedNodes.has('budget-table-container')) {
+      this.invoke();
+    }
   }
 
   onRouteChanged() {

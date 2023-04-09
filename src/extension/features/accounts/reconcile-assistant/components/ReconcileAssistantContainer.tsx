@@ -4,6 +4,8 @@ import { ReconcileAssistantModal } from './ReconcileAssistantModal';
 import { getSelectedAccount } from 'toolkit/extension/utils/ynab';
 import { stripCurrency } from 'toolkit/extension/utils/currency';
 
+import type { YNABTransaction } from 'toolkit/types/ynab/data/transaction';
+
 interface ReconcileAssistantContainerProps {
   reconcileInputValue: string;
   portalId: string;
@@ -17,7 +19,7 @@ export function ReconcileAssistantContainer({
   const [clearedTotal, setClearedTotal] = useState(0);
   const [isModalOpened, setModalOpened] = useState(false);
   const [isToolTipVisible, setIsToolTipVisible] = useState(false);
-  const [transactions, setTransactions] = useState<Array<Transaction>>([]);
+  const [transactions, setTransactions] = useState<Array<YNABTransaction>>([]);
 
   /**
    * Get the current account on this page
@@ -33,6 +35,10 @@ export function ReconcileAssistantContainer({
     // If we get an invalid number such as a string, 0 will be returned and will match ynab's functionality
     let convertedInputValue: number = stripCurrency(reconcileInputValue);
     const account = getSelectedAccount();
+    if (!account) {
+      return;
+    }
+
     const { clearedBalance } = account.getAccountCalculation();
 
     // Note: For credit cards, we'll automatically invert to follow ynab's behavior

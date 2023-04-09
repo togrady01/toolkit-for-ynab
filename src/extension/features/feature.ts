@@ -1,5 +1,5 @@
 import { observeListener, routeChangeListener } from 'toolkit/extension/ynab-toolkit';
-import { logToolkitError } from 'toolkit/core/common/errors/with-toolkit-error';
+import { logToolkitError, withToolkitError } from 'toolkit/core/common/errors/with-toolkit-error';
 import { SupportedEmberHook } from '../ynab-toolkit';
 import { addToolkitEmberHook, removeToolkitEmberHook } from '../utils/toolkit';
 import { forEachRenderedComponent } from '../utils/ember';
@@ -44,7 +44,7 @@ export class Feature {
     });
   }
 
-  observe(): void {
+  observe(changedNodes: Set<string>): void {
     /* stubbed listener function */
   }
 
@@ -86,20 +86,29 @@ export class Feature {
     componentKey: string,
     lifecycleHook: SupportedEmberHook,
     fn: (element: HTMLElement) => void,
-    options?: { debounce: number }
+    options?: { debounce?: number; guard?: (element: HTMLElement) => boolean }
   ): void {
-    if (options && options.debounce) {
-      fn = this.debounce(fn, options.debounce);
-    }
-
-    addToolkitEmberHook(this, componentKey, lifecycleHook, fn);
-    this.__hooks.set(`${componentKey}:${lifecycleHook}`, fn);
-
-    forEachRenderedComponent(componentKey, (view: { element: HTMLElement }) => {
-      if (view.element) {
-        fn.call(this, view.element);
+    const wrappedAddToolkitEmberHook = withToolkitError(() => {
+      if (options?.debounce != null) {
+        fn = this.debounce(fn, options.debounce);
       }
-    });
+
+      addToolkitEmberHook(this, componentKey, lifecycleHook, fn, options?.guard);
+
+      this.__hooks.set(`${componentKey}:${lifecycleHook}`, fn);
+
+      forEachRenderedComponent(componentKey, (view: { element: HTMLElement }) => {
+        if (view.element) {
+          if (options?.guard && !options.guard(view.element)) {
+            return;
+          }
+
+          fn.call(this, view.element);
+        }
+      });
+    }, this.featureName);
+
+    wrappedAddToolkitEmberHook();
   }
 
   removeToolkitEmberHook(
@@ -107,8 +116,12 @@ export class Feature {
     lifecycleHook: SupportedEmberHook,
     fn: (element: HTMLElement) => void
   ): void {
-    removeToolkitEmberHook(componentKey, lifecycleHook, fn);
-    this.__hooks.delete(`${componentKey}:${lifecycleHook}`);
+    const wrappedRemoveToolkitEmberHook = withToolkitError(() => {
+      removeToolkitEmberHook(componentKey, lifecycleHook, fn);
+      this.__hooks.delete(`${componentKey}:${lifecycleHook}`);
+    }, this.featureName);
+
+    wrappedRemoveToolkitEmberHook();
   }
 
   removeToolkitEmberHooks(): void {

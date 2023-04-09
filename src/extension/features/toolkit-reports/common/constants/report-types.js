@@ -6,6 +6,7 @@ export const ReportKeys = {
   IncomeVsExpense: 'income-vs-expense',
   IncomeBreakdown: 'income-breakdown',
   BalanceOverTime: 'balance-over-time',
+  OutflowOverTime: 'outflow-over-time',
   Forecast: 'forecast',
   AgeOfMoney: 'age-of-money',
 };
@@ -18,6 +19,7 @@ export const ReportNames = {
   IncomeVsExpense: 'Income vs. Expense',
   IncomeBreakdown: 'Income Breakdown',
   BalanceOverTime: 'Balance Over Time',
+  OutflowOverTime: 'Outflow Over Time',
   Forecast: 'Forecast',
   AgeOfMoney: 'Age of Money',
 };
@@ -50,6 +52,10 @@ export const REPORT_TYPES = [
   {
     key: ReportKeys.BalanceOverTime,
     name: ReportNames.BalanceOverTime,
+  },
+  {
+    key: ReportKeys.OutflowOverTime,
+    name: ReportNames.OutflowOverTime,
   },
   {
     key: ReportKeys.Forecast,

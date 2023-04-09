@@ -1,5 +1,5 @@
 import { Feature } from 'toolkit/extension/features/feature';
-import { controllerLookup } from 'toolkit/extension/utils/ember';
+import { controllerLookup, containerLookup } from 'toolkit/extension/utils/ember';
 import { l10n } from 'toolkit/extension/utils/toolkit';
 
 export class ClearSelection extends Feature {
@@ -8,7 +8,7 @@ export class ClearSelection extends Feature {
 
     try {
       accountsController.set('areAllTransactionsSet', false);
-      accountsController.get('areChecked').setEach('isChecked', 0);
+      containerLookup('service:accounts').areChecked.setEach('isChecked', false);
       accountsController.send('closeModal');
     } catch (exception) {
       accountsController.send('closeModal');
@@ -21,11 +21,9 @@ export class ClearSelection extends Feature {
   }
 
   invoke() {
-    this.addToolkitEmberHook(
-      'modals/register/edit-transactions',
-      'didRender',
-      this.insertClearSelection
-    );
+    this.addToolkitEmberHook('modal', 'didRender', this.insertClearSelection, {
+      guard: () => document.querySelector('.modal-account-edit-transaction-list') !== null,
+    });
   }
 
   destroy() {
