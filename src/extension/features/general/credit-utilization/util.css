@@ -1,0 +1,11 @@
+div.nav-account-name.user-data span.util {
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-right: 0.25rem;
+}
+div.nav-account-name.user-data span.util.green {
+  color: green;
+}
+div.nav-account-name.user-data span.util.yellow {
+  color: yellow;
+}
