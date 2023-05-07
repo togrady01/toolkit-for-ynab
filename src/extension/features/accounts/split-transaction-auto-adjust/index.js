@@ -20,11 +20,14 @@ export class SplitTransactionAutoAdjust extends Feature {
     if (remaining) {
       for (let i = 1; i < outflows.length; i++) {
         if (outflows[i].value === '' && inflows[i].value === '') {
-          if (remaining !== 0) {
-            const negMultiple = remaining < 1 ? -1 : 1;
-            outflows[i].value = ynab.formatCurrency(negMultiple * remaining * 1000);
+          if (remaining < 0) {
+            outflows[i].value = ynab.formatCurrency(-remaining * 1000);
             outflows[i].dispatchEvent(new Event('change'));
             outflows[i].dispatchEvent(new Event('blur'));
+          } else if (remaining > 0) {
+            inflows[i].value = ynab.formatCurrency(remaining * 1000);
+            inflows[i].dispatchEvent(new Event('change'));
+            inflows[i].dispatchEvent(new Event('blur'));
           }
           break;
         }
